@@ -9,7 +9,7 @@
 ...
 services:
   ping:
-    image: willfarrell/ping
+    image: meltwater/latency-test
     environment:
       HOSTNAME: "10.0.0.61"
       TIMEOUT: 300
