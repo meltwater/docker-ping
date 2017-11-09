@@ -1,4 +1,7 @@
 FROM alpine:3.5
+
+RUN apk update && apk-install jq
+
 COPY ping /
 
 HEALTHCHECK --interval=5s --timeout=3s \
