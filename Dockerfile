@@ -1,6 +1,8 @@
-FROM alpine:3.5
+FROM alpine:3.6
 
-RUN apk add jq curl
+RUN apk update && \
+    apk add jq && \
+    apk add curl
 
 COPY ping /
 
