@@ -1,0 +1,30 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+env:
+  global:
+    - BUILD_VERSION="1.0"
+    - FILES_CHANGED=$(git diff --name-only $TRAVIS_COMMIT_RANGE | grep -v \/ | sort | uniq | tr '\n' ' ')
+    - secure: "gsCVo9h2NtbMAvXzK169yGvU8J7GZwPLLJGJJ3NxrD8iV/wLY0ICWSqnE66pgx8Gg42pwr3ujDKcueD/vnxhcLUuXI4GsZhMWNewo7ffm/8ZiBRkEwTjFpVWPeguGVicIX/t4ihITolXaZ1FAYCNe/rlKfWYUP0KInYcvY2wHcTrbIiR//R4WQ77gfX2LZSe5ydXDa96Zj3pj/K4kb7XjkTs6P295gwYr2gskG/EfQc71n1PlX9QoqGNP8qoub48Zzv0Ouwcy1l18v18pW2ZGq/TkTQT7IOwgz0L/iR9oMf1CMZEIV2LXvAFNZGlu8A6i5WDQTuMm101jE4pBswD+XQ+FYQWi0Lrw6gOaKLcxUm4rSzXB636YhaOQRSHMeCXf9kByDCO0hMIuJuVABFaXBoiQ8TcSYJd1oEJ1wlXZgy+qNQ0rHHuYQ7M/zacrToourbUP6HnJxZPCCeeDiVKnEoAwkufXvXcZcCfcm1QGSVDoeMe1tMfF2LJIUGIqY20dONMr+lF370yWWpsjblo6H3ACpIES3QBQNdUHS5odzENsMzTy2n/NYfGjFDHQO+PoNe5CQZjukeimbaN53Xri3eseseA2MkLTlSJWG4zMAi0stTjxHzZDHORCe6Hb9+jJUSkVyf46RIGDuu8D73All2vgPlZ3qFx/W+M7ycKhgc=" # DOCKER_PASS
+
+before_script: docker login -u meltwaterfoundation -p $DOCKER_PASS
+
+script: |
+  if [[ $FILES_CHANGED =~ (.travis.yml|Dockerfile|Gemfile) ]]; then
+    docker build -t meltwater/latency-test:$BUILD_VERSION .
+    docker tag meltwater/latency-test:$BUILD_VERSION meltwater/latency-test:latest
+    touch ~/.builtimage
+  fi
+deploy:
+  provider: script
+  script: if [ -f ~/.builtimage ]; then docker push meltwater/latency-test:$BUILD_VERSION && docker push meltwater/latency-test:latest; fi
+  on:
+    branch: master
+
+branches:
+  only:
+    - master
