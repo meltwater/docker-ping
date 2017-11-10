@@ -2,4 +2,6 @@
 DOCKER_HOST_IP=$(route -n | awk '/UG[ \t]/{print $2}')
 echo ping ${HOSTNAME:=localhost} every ${TIMEOUT:=300} sec
 
-while true; do echo "$STATSDLOC:$(curl -s ${HOSTNAME}:7801/stats | jq -r '.average_response_time_sec'):g" | nc -w 1 -u $DOCKER_HOST_IP 8125; sleep ${TIMEOUT}; done;
+### Commented out in favor of ICMP responder since timing is not coming back properly
+### while true; do echo "$STATSDLOC:$(curl -s ${HOSTNAME}:7801/stats | jq -r '.average_response_time_sec'):g" | nc -w 1 -u $DOCKER_HOST_IP 8125; sleep ${TIMEOUT}; done;
+while true; do echo "$STATSDLOC:$(ping -w 1 -c 1 ${HOSTNAME} | cut -d "/" -s -f5 | sed 's/ ms$//'):g" | nc -w 1 -u $DOCKER_HOST_IP 8125; sleep ${TIMEOUT}; done;
